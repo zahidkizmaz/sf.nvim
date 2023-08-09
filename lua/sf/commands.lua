@@ -11,12 +11,12 @@ end
 function M.run_test_command(class_name, opts)
   local code_coverage = opts.code_coverage or true
 
-  local cmd = "sf apex run test --result-format human --synchronous --tests "
+  local cmd = "sf apex run test --result-format human --synchronous"
   if code_coverage then
     cmd = cmd .. " --code-coverage"
   end
 
-  return "sf apex run test --result-format human --synchronous --tests " .. class_name
+  return cmd .. " --tests " .. class_name
 end
 
 return M
