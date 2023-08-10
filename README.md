@@ -1,15 +1,17 @@
 # sf.nvim
 
-##### Minimal [SF CLI](https://github.com/salesforcecli/cli) tool wrapper for neovim.
+**Minimal [SF CLI](https://github.com/salesforcecli/cli) tool wrapper for neovim.**
 
 This plugin creates custom commands for making SF Apex development smoother in neovim.
 
 ### Commmands
 
-1. SFRun -> Run the file at current buffer
-1. SFDeploy -> Deploy the file open at current buffer to the default sf org
-1. SFTest -> Run test file open at current buffer
-1. SFDeployTest -> First deploy the file and then run tests
+-   SFRun -> Run the file at current buffer
+-   SFDeploy -> Deploy the file open at current buffer to the default sf org
+-   SFTest -> Run test file open at current buffer
+-   SFDeployTest -> First deploy the file and then run tests
+-   SFShow -> Show the SF split buffer
+-   SFHide -> Hide the SF split buffer
 
 ### Installation
 
