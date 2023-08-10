@@ -5,27 +5,11 @@ local commands = require("sf.commands")
 
 function M.setup(config)
   config = config or {}
-  local opts = { noremap = true, silent = true }
-  vim.api.nvim_create_user_command("SFDeploy", function()
-    M.deploy_file()
-  end, {})
-  vim.keymap.set("n", "<leader>sfd", function()
-    vim.cmd("SFDeploy")
-  end, opts)
-
-  vim.api.nvim_create_user_command("SFTest", function()
-    M.run_test()
-  end, {})
-  vim.keymap.set("n", "<leader>sft", function()
-    vim.cmd("SFTest")
-  end, opts)
-
-  vim.api.nvim_create_user_command("SFDeployTest", function()
-    M.deploy_and_test()
-  end, {})
-  vim.keymap.set("n", "<leader>sfT", function()
-    vim.cmd("SFDeployTest")
-  end, opts)
+  local user_cmd = vim.api.nvim_create_user_command
+  user_cmd("SFRun", M.run_file(), {})
+  user_cmd("SFTest", M.run_test(), {})
+  user_cmd("SFDeploy", M.deploy_file, {})
+  user_cmd("SFDeployTest", M.deploy_and_test(), {})
 end
 
 function M.run_file()
