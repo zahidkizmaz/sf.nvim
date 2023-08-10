@@ -6,29 +6,35 @@ local commands = require("sf.commands")
 function M.setup(config)
   config = config or {}
   local user_cmd = vim.api.nvim_create_user_command
-  user_cmd("SFRun", M.run_file(), {})
-  user_cmd("SFTest", M.run_test(), {})
+
+  -- SF CLI commands
+  user_cmd("SFRun", M.run_file, {})
+  user_cmd("SFTest", M.run_test, {})
   user_cmd("SFDeploy", M.deploy_file, {})
-  user_cmd("SFDeployTest", M.deploy_and_test(), {})
+  user_cmd("SFDeployTest", M.deploy_and_test, {})
+
+  -- Split buffer commands
+  user_cmd("SFShow", M.show_split, {})
+  user_cmd("SFHide", M.hide_split, {})
 end
 
 function M.run_file()
   local file_path = vim.fn.expand("%")
   local cmd = commands.run_file_command(file_path)
-  M.create_terminal(cmd)
+  M.run_cmd_in_split(cmd)
 end
 
 function M.deploy_file()
   local file_path = vim.fn.expand("%")
   local cmd = commands.deploy_file_command(file_path)
-  M.create_terminal(cmd)
+  M.run_cmd_in_split(cmd)
 end
 
 function M.run_test()
   local file_path = vim.fn.expand("%:t")
   local class_name = file_path:gsub("%.cls", "")
   local cmd = commands.run_test_command(class_name, {})
-  M.create_terminal(cmd)
+  M.run_cmd_in_split(cmd)
 end
 
 function M.deploy_and_test()
@@ -38,10 +44,43 @@ function M.deploy_and_test()
   local file_path = vim.fn.expand("%:t")
   local class_name = file_path:gsub("%.cls", "")
   local test_cmd = commands.run_test_command(class_name, {})
-  M.create_terminal(deploy_cmd .. " && " .. test_cmd)
+  M.run_cmd_in_split(deploy_cmd .. " && " .. test_cmd)
 end
 
-function M.create_terminal(cmd)
+M.hide_split = function()
+  if not M.split then
+    vim.api.nvim_err_writeln("sf.nvim: No split found")
+    return
+  end
+  M.split:hide()
+end
+
+M.show_split = function()
+  if not M.split then
+    vim.api.nvim_err_writeln("sf.nvim: No split found")
+    return
+  end
+  M.split:show()
+end
+
+function M.run_cmd_in_split(cmd)
+  -- Setup split buffer
+  M._mount_split()
+  M._clean_buffer_lines()
+  M._append_cmd_to_buffer(cmd)
+
+  -- Run command
+  vim.fn.jobstart(cmd, {
+    on_stdout = function(_, stdout)
+      M._append_lines_to_buffer(stdout)
+    end,
+    on_stderr = function(_, stderr)
+      M._append_lines_to_buffer(stderr)
+    end,
+  })
+end
+
+M._mount_split = function()
   if not M.split then
     M.split = Split(M.default_split_config)
     M.split:mount()
@@ -58,17 +97,6 @@ function M.create_terminal(cmd)
     M.split = Split(M.default_split_config)
     M.split:mount()
   end
-
-  M._clean_buffer_lines()
-  M._append_cmd_to_buffer(cmd)
-  vim.fn.jobstart(cmd, {
-    on_stdout = function(_, stdout)
-      M._append_lines_to_buffer(stdout)
-    end,
-    on_stderr = function(_, stderr)
-      M._append_lines_to_buffer(stderr)
-    end,
-  })
 end
 
 M._clean_buffer_lines = function()
