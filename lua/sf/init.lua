@@ -44,7 +44,7 @@ function M.deploy_and_test()
   local file_path = vim.fn.expand("%:t")
   local class_name = file_path:gsub("%.cls", "")
   local test_cmd = commands.run_test_command(class_name, {})
-  M.run_cmd_in_split(deploy_cmd .. " && " .. test_cmd)
+  M.run_two_cmds_in_split(deploy_cmd, test_cmd)
 end
 
 M.hide_split = function()
@@ -63,19 +63,31 @@ M.show_split = function()
   M.split:show()
 end
 
-function M.run_cmd_in_split(cmd)
-  -- Setup split buffer
+function M.run_two_cmds_in_split(first, second)
   M._mount_split()
   M._clean_buffer_lines()
-  M._append_cmd_to_buffer(cmd)
+  M._run_cmd(first, { on_exit = second })
+end
 
-  -- Run command
+function M.run_cmd_in_split(cmd)
+  M._mount_split()
+  M._clean_buffer_lines()
+  M._run_cmd(cmd)
+end
+
+M._run_cmd = function(cmd, opts)
+  M._append_cmd_to_buffer(cmd)
   vim.fn.jobstart(cmd, {
     on_stdout = function(_, stdout)
       M._append_lines_to_buffer(stdout)
     end,
     on_stderr = function(_, stderr)
       M._append_lines_to_buffer(stderr)
+    end,
+    on_exit = function()
+      if opts and opts.on_exit then
+        M._run_cmd(opts.on_exit, {})
+      end
     end,
   })
 end
@@ -106,10 +118,11 @@ M._clean_buffer_lines = function()
 end
 
 M._append_cmd_to_buffer = function(cmd)
+  local pretty_cmd = "$ " .. vim.fn.trim(cmd)
   local start_line = vim.api.nvim_buf_line_count(M.split.bufnr) - 1
-  local end_line = start_line + 1
+  local end_line = start_line
   vim.api.nvim_buf_set_option(M.split.bufnr, "modifiable", true)
-  vim.api.nvim_buf_set_lines(M.split.bufnr, start_line, end_line, false, { "$ " .. cmd })
+  vim.api.nvim_buf_set_lines(M.split.bufnr, start_line, end_line, false, { pretty_cmd })
   vim.api.nvim_buf_add_highlight(M.split.bufnr, -1, "Visual", start_line, 2, -1)
   vim.api.nvim_buf_set_option(M.split.bufnr, "modifiable", false)
 end
