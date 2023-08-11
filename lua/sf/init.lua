@@ -78,13 +78,19 @@ end
 M._run_cmd = function(cmd, opts)
   M._append_cmd_to_buffer(cmd)
   vim.fn.jobstart(cmd, {
+    stdout_buffered = true,
+    stderr_buffered = true,
     on_stdout = function(_, stdout)
       M._append_lines_to_buffer(stdout)
     end,
     on_stderr = function(_, stderr)
       M._append_lines_to_buffer(stderr)
     end,
-    on_exit = function()
+    on_exit = function(_, data)
+      if data ~= 0 then
+        -- Previous command did not succeed
+        return
+      end
       if opts and opts.on_exit then
         M._run_cmd(opts.on_exit, {})
       end
