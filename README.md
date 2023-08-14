@@ -23,6 +23,8 @@ This plugin creates custom commands for making SF Apex development smoother in n
   dependencies = { "MunifTanjim/nui.nvim" },
   config = true,
   keys = {
+    { "<leader>sfs", "<cmd>SFShow<cr>", desc = "Show sf.nvim split" },
+    { "<leader>sfh", "<cmd>SFHide<cr>", desc = "Hide sf.nvim split" },
     { "<leader>sft", "<cmd>SFTest<cr>", desc = "Run test class in current buffer" },
     { "<leader>sfd", "<cmd>SFDeploy<cr>", desc = "Deploy current buffer to default sf org" },
     { "<leader>sfT", "<cmd>SFDeployTest<cr>", desc = "Deploy and run tests of the current buffer" },
@@ -37,4 +39,45 @@ This plugin creates custom commands for making SF Apex development smoother in n
   "zahidkizmaz/sf.nvim",
   requires = { "MunifTanjim/nui.nvim" },
 }
+```
+
+### Configurations
+
+Default configuration for the split:
+
+```lua
+{
+  relative = "editor",
+  position = "right",
+  size = "40%",
+  enter = false,
+  border = {
+    text = {
+      top = "sf.nvim",
+      top_align = "center",
+    },
+    style = "rounded",
+  },
+}
+
+```
+
+This can be customised by passing a custom [configuration table](https://github.com/MunifTanjim/nui.nvim#split) such as:
+
+```lua
+require("sf").setup({
+  split = {
+    relative = "editor",
+    position = "left",
+    size = "60%",
+    enter = true,
+    border = {
+      text = {
+        top = "sf.nvim",
+        top_align = "center",
+      },
+      style = "rounded",
+    },
+  }
+})
 ```

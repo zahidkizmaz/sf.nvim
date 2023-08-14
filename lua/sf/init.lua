@@ -3,10 +3,27 @@ local M = {}
 local Split = require("nui.split")
 local commands = require("sf.commands")
 
-function M.setup(config)
-  config = config or {}
-  local user_cmd = vim.api.nvim_create_user_command
+M.split = nil
+M.split_config = nil
+M.split_config_default = {
+  relative = "editor",
+  position = "right",
+  size = "40%",
+  enter = false,
+  border = {
+    text = {
+      top = "sf.nvim",
+      top_align = "center",
+    },
+    style = "rounded",
+  },
+}
 
+function M.setup(config)
+  local user_split_config = config.split or {}
+  M.split_config = vim.tbl_deep_extend("force", M.split_config_default, user_split_config)
+
+  local user_cmd = vim.api.nvim_create_user_command
   -- SF CLI commands
   user_cmd("SFRun", M.run_file, {})
   user_cmd("SFTest", M.run_test, {})
@@ -100,7 +117,7 @@ end
 
 M._mount_split = function()
   if not M.split then
-    M.split = Split(M.default_split_config)
+    M.split = Split(M.split_config)
     M.split:mount()
   end
 
@@ -112,7 +129,7 @@ M._mount_split = function()
   end
   if not same_tab then
     M.split:unmount()
-    M.split = Split(M.default_split_config)
+    M.split = Split(M.split_config)
     M.split:mount()
   end
 end
@@ -140,20 +157,5 @@ M._append_lines_to_buffer = function(lines)
   vim.api.nvim_buf_set_lines(M.split.bufnr, start_line, end_line, false, lines)
   vim.api.nvim_buf_set_option(M.split.bufnr, "modifiable", false)
 end
-
-M.split = nil
-M.default_split_config = {
-  relative = "editor",
-  position = "right",
-  size = "40%",
-  enter = false,
-  border = {
-    text = {
-      top = "sf.nvim",
-      top_align = "center",
-    },
-    style = "rounded",
-  },
-}
 
 return M
