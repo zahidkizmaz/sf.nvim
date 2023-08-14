@@ -67,17 +67,7 @@ This can be customised by passing a custom [configuration table](https://github.
 ```lua
 require("sf").setup({
   split = {
-    relative = "editor",
     position = "left",
-    size = "60%",
-    enter = true,
-    border = {
-      text = {
-        top = "sf.nvim",
-        top_align = "center",
-      },
-      style = "rounded",
-    },
   }
 })
 ```
